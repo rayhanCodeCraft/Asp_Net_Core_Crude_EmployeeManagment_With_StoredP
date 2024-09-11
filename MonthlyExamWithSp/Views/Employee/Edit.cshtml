@@ -1,0 +1,129 @@
+﻿@model MonthlyExamWithSp.Models.ViewModel.EmployeeVM
+@{
+    ViewData["Title"] = "Edit";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<form id="editForm" asp-action="Edit" method="post" enctype="multipart/form-data">
+    <input type="hidden" asp-for="EmployeeId" />
+    <div class="row">
+        <div class="col-6">
+            <h2>Edit Employee</h2>
+            <div class="form-group mb-3">
+                <label asp-for="Name" class="form-label"></label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            <div class="form-group mb-3">
+                <label asp-for="IsActive" class="form-label"></label>
+                <div class="form-check">
+                    <input asp-for="IsActive" class="form-check-input" type="checkbox" />
+                    <span asp-validation-for="IsActive" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="form-group mb-3">
+                <label asp-for="JoinDate" class="form-label"></label>
+                <input asp-for="JoinDate" class="form-control" />
+                <span asp-validation-for="JoinDate" class="text-danger"></span>
+            </div>
+            <div class="form-group mb-3">
+                <label asp-for="ImageFile" class="form-label"></label>
+                <div class="custom-file">
+                    <input asp-for="ImageFile" type="file" class="custom-file-input" id="customFile" onchange="document.getElementById('PreviewPhoto').src = window.URL.createObjectURL(this.files[0])" />
+                    <label class="custom-file-label" for="customFile">Choose file</label>
+                </div>
+                <img id="PreviewPhoto" src="@Model.ImageUrl" alt="Current Image" class="mt-2 border" style="width: 125px; height: 125px;" />
+                <span asp-validation-for="ImageFile" class="text-danger"></span>
+            </div>
+            <div class="form-group mb-3">
+                <label asp-for="Salary" class="form-label"></label>
+                <input asp-for="Salary" class="form-control" />
+                <span asp-validation-for="Salary" class="text-danger"></span>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Update</button>
+        </div>
+        <div class="col-6">
+            <h3>Experiences</h3>
+            <div id="experienceList">
+                @for (int i = 0; i < Model.Experiences.Count; i++)
+                {
+                    <div class="form-group experience-item mb-3">
+                        <div class="row">
+                            <div class="col-4">
+                                <label asp-for="@Model.Experiences[i].Title" class="form-label"></label>
+                                <input asp-for="@Model.Experiences[i].Title" class="form-control" />
+                                <span asp-validation-for="@Model.Experiences[i].Title" class="text-danger"></span>
+                            </div>
+                            <div class="col-4">
+                                <label asp-for="@Model.Experiences[i].Duration" class="form-label"></label>
+                                <input asp-for="@Model.Experiences[i].Duration" class="form-control" />
+                                <span asp-validation-for="@Model.Experiences[i].Duration" class="text-danger"></span>
+                            </div>
+                            <div class="col-4">
+                                <button type="button" class="btn btn-danger remove-experience">Remove</button>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+            <div class="text-center">
+                <button type="button" class="btn btn-secondary" onclick="addExperience()">Add Experience</button>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <script src="~/jquery/jquery.min.js"></script>
+    <script>
+        function addExperience() {
+            var index = $('#experienceList .experience-item').length;
+            var newExperience = `
+                    <div class="form-group experience-item mb-3" data-index="${index}">
+                        <div class="row">
+                            <div class="col-4">
+                                <label for="Experiences_${index}__Title" class="form-label">Title</label>
+                                <input name="Experiences[${index}].Title" class="form-control" />
+                                <span class="text-danger"></span>
+                            </div>
+                            <div class="col-4">
+                                <label for="Experiences_${index}__Duration" class="form-label">Duration</label>
+                                <input name="Experiences[${index}].Duration" class="form-control" />
+                                <span class="text-danger"></span>
+                            </div>
+                            <div class="col-4">
+                                <button type="button" class="btn btn-danger remove-experience">Remove</button>
+                            </div>
+                        </div>
+                    </div>`;
+            $('#experienceList').append(newExperience);
+        }
+
+        // Event delegation to handle the click event on dynamically added "Remove" buttons
+        $(document).on('click', '.remove-experience', function () {
+            $(this).closest('.experience-item').remove();
+            updateExperienceIndices();
+        });
+
+        function updateExperienceIndices() {
+            $('#experienceList .experience-item').each(function (index) {
+                $(this).attr('data-index', index);
+                $(this).find('input, label').each(function () {
+                    var nameAttr = $(this).attr('name');
+                    var forAttr = $(this).attr('for');
+                    if (nameAttr) {
+                        var newName = nameAttr.replace(/\d+/, index);
+                        $(this).attr('name', newName);
+                    }
+                    if (forAttr) {
+                        var newFor = forAttr.replace(/\d+/, index);
+                        $(this).attr('for', newFor);
+                    }
+                });
+            });
+        }
+    </script>
+
+}
+
